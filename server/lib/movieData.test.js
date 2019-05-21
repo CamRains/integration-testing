@@ -1,22 +1,17 @@
 const movieData = require('./movieData');
-const sinon = require('sinon');
 const testInit = require('../../test/init');
 
 describe('unit tests', () => {
   describe('create', () => {
     it('automatically passes in the current createdAt timestamp', () => {
       const movieName = 'Test Movie Name';
-      const fakeDb = {
-        query: sinon.mock()
-          .withArgs(
-            sinon.match.string,
-            sinon.match({
-              name: movieName,
-              createdAt: sinon.match.date
-            })
-          )
-      };
-      return movieData.create(fakeDb, { name: movieName })
+      const query = jest.fn();
+      const fakeDb = { query };
+      movieData.create(fakeDb, { name: movieName })
+      expect(query).toBeCalledWith(expect.any(String), expect.objectContaining({
+        name: movieName,
+        createdAt: expect.any(Date)
+      }))
     });
   });
 });
