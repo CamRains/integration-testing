@@ -29,14 +29,15 @@ describe('integration tests', () => {
   });
 
   describe('create', () => {
+    const movieName = 'Test Movie Name';
+    const req = {
+      app: {
+        get: () => db
+      },
+      body: { name: movieName }
+    };
+
     it('responds with success', done => {
-      const movieName = 'Test Movie Name';
-      const req = {
-        app: {
-          get: () => db
-        },
-        body: { name: movieName }
-      };
       const res = {
         json: function(data) {
           expect(data).toMatchObject({
@@ -50,25 +51,18 @@ describe('integration tests', () => {
     });
     
     it('responds with an error on a duplicate movie name', done => {
-      const movieName = 'Test Movie Name';
       // First, force a single movie in the database.
       movieData.create(db, { name: movieName }).then(() => {
         // Now use the controller to create it again.
-        const req = {
-          app: {
-            get: () => db
-          },
-          body: { name: movieName }
-        };
         const res = {
           status(num) {
             expect(num).toBe(500);
-            return {
-              json(data) {
-                expect(data).toEqual({ message: 'There was an error on the server' });
-                done();
-              }
-            };
+            return this;
+          },
+
+          json(data) {
+            expect(data).toEqual({ message: 'There was an error on the server' });
+            done();
           }
         };
         moviesController.create(req, res);
