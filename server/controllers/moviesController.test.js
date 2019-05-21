@@ -1,19 +1,18 @@
 const moviesController = require('./moviesController');
 const testInit = require('../../test/init');
 const movieData = require('../lib/movieData');
-const sinon = require('sinon');
-const sandbox = sinon.createSandbox();
 
 describe('integration tests', () => {
   let db;
   function clearDatabase() {
     return db.query('DELETE FROM movies');
   }
+  const oldConsoleError = console.error;
 
   beforeAll(() => {
     // This hides the error when we console log in the code called from the
     // test named "responds with an error on a duplicate movie name".
-    sandbox.stub(console, 'error');
+    console.error = () => {}
 
     return testInit.initDb().then(database => {
       db = database;
@@ -21,7 +20,7 @@ describe('integration tests', () => {
   });
 
   afterAll(() => {
-    sandbox.restore();
+    console.error = oldConsoleError;
   });
 
   beforeEach(() => {
