@@ -7,24 +7,31 @@ describe('integration tests', () => {
   function clearDatabase() {
     return db.query('DELETE FROM movies');
   }
-  const oldConsoleError = console.error;
 
   beforeAll(() => {
-    // This hides the error when we console log in the code called from the
-    // test named "responds with an error on a duplicate movie name".
-    console.error = () => {}
-
     return testInit.initDb().then(database => {
       db = database;
     });
   });
 
-  afterAll(() => {
-    console.error = oldConsoleError;
-  });
-
   beforeEach(() => {
     return clearDatabase();
+  });
+
+  beforeAll(() => {
+    // This hides the error when we console log in the code called from the
+    // test named "responds with an error on a duplicate movie name".
+    // From: https://stackoverflow.com/a/52259482/135101
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+  afterAll(() => {
+    // Restore mock after all tests are done, so it won't affect other test suites
+    console.error.mockRestore();
+  });
+  afterEach(() => {
+    // Clear mock (all calls etc) after each test.
+    // It's needed when you're using console somewhere in the tests so you have clean mock each time
+    console.error.mockClear();
   });
 
   describe('create', () => {
